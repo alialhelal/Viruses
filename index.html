@@ -1,0 +1,498 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>مغامرة الفيروسات</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;700&display=swap" rel="stylesheet">
+    <style>
+        /* --- General Styles --- */
+        :root {
+            --primary-bg: #f0f8ff; /* AliceBlue - لون خلفية فاتح ونظيف */
+            --secondary-bg: #ffffff;
+            --primary-text: #0d47a1; /* أزرق غامق للنصوص الرئيسية */
+            --secondary-text: #424242;
+            --accent-color: #00bcd4; /* Cyan - لون مميز */
+            --accent-hover: #0097a7;
+            --correct-color: #4caf50; /* أخضر للإجابة الصحيحة */
+            --incorrect-color: #f44336; /* أحمر للإجابة الخاطئة */
+            --border-radius: 12px;
+            --box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+        }
+
+        body {
+            font-family: 'Cairo', sans-serif;
+            background-color: var(--primary-bg);
+            color: var(--secondary-text);
+            margin: 0;
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            min-height: 100vh;
+        }
+
+        /* --- Header Styles --- */
+        .top-header {
+            background-color: var(--accent-color);
+            color: white;
+            padding: 10px 20px;
+            border-radius: var(--border-radius);
+            font-size: 1.2em;
+            font-weight: bold;
+            margin-bottom: 20px;
+            box-shadow: var(--box-shadow);
+        }
+
+        .teacher-profile img {
+            width: 150px;
+            height: 150px;
+            border-radius: 50%;
+            border: 5px solid var(--accent-color);
+            box-shadow: var(--box-shadow);
+        }
+
+        /* --- Game Container --- */
+        .game-container {
+            background-color: var(--secondary-bg);
+            border-radius: var(--border-radius);
+            box-shadow: var(--box-shadow);
+            width: 100%;
+            max-width: 700px;
+            padding: 30px;
+            overflow: hidden;
+            text-align: center;
+        }
+
+        .screen {
+            display: none;
+            animation: fadeIn 0.5s ease-in-out;
+        }
+
+        .screen.active {
+            display: block;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: scale(0.95); }
+            to { opacity: 1; transform: scale(1); }
+        }
+
+        /* --- Start Screen --- */
+        .main-title {
+            color: var(--primary-text);
+            font-size: 1.8em;
+            margin-bottom: 25px;
+        }
+
+        .input-group {
+            margin-bottom: 20px;
+            text-align: right;
+        }
+
+        .input-group label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: bold;
+            color: var(--primary-text);
+        }
+
+        .input-group input {
+            width: 100%;
+            padding: 12px;
+            border: 2px solid #ddd;
+            border-radius: 8px;
+            font-size: 1em;
+            font-family: 'Cairo', sans-serif;
+            transition: border-color 0.3s;
+        }
+
+        .input-group input:focus {
+            outline: none;
+            border-color: var(--accent-color);
+        }
+
+        /* --- Buttons --- */
+        .btn {
+            background-color: var(--accent-color);
+            color: white;
+            border: none;
+            padding: 15px 30px;
+            border-radius: 8px;
+            font-size: 1.2em;
+            font-weight: bold;
+            font-family: 'Cairo', sans-serif;
+            cursor: pointer;
+            transition: background-color 0.3s, transform 0.2s;
+            margin-top: 10px;
+        }
+
+        .btn:hover {
+            background-color: var(--accent-hover);
+            transform: translateY(-2px);
+        }
+
+        /* --- Game Screen --- */
+        .hud {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 20px;
+            font-size: 1.1em;
+            font-weight: bold;
+        }
+        
+        .hud-item {
+            background-color: #e3f2fd;
+            color: var(--primary-text);
+            padding: 10px 15px;
+            border-radius: 8px;
+        }
+
+        #question-container {
+            background-color: #e0f7fa; /* Light Cyan */
+            padding: 20px;
+            border-radius: var(--border-radius);
+            margin-bottom: 25px;
+            min-height: 80px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        #question-text {
+            font-size: 1.4em;
+            color: var(--primary-text);
+            font-weight: bold;
+        }
+
+        .answers {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 15px;
+        }
+
+        .answer-btn {
+            background-color: #ffffff;
+            color: var(--accent-color);
+            border: 2px solid var(--accent-color);
+            padding: 15px;
+            border-radius: 8px;
+            font-size: 1.1em;
+            cursor: pointer;
+            transition: all 0.3s;
+            font-family: 'Cairo', sans-serif;
+        }
+
+        .answer-btn:hover {
+            background-color: var(--accent-color);
+            color: white;
+        }
+        
+        .answer-btn.correct {
+            background-color: var(--correct-color);
+            color: white;
+            border-color: var(--correct-color);
+        }
+
+        .answer-btn.incorrect {
+            background-color: var(--incorrect-color);
+            color: white;
+            border-color: var(--incorrect-color);
+        }
+        
+        .answer-btn:disabled {
+            cursor: not-allowed;
+            opacity: 0.7;
+        }
+
+        .progress-bar-container {
+            width: 100%;
+            background-color: #e0e0e0;
+            border-radius: 10px;
+            margin-top: 30px;
+            height: 25px;
+            overflow: hidden;
+        }
+
+        .progress-bar-inner {
+            height: 100%;
+            width: 0%;
+            background: linear-gradient(90deg, var(--accent-color), #84ffff);
+            border-radius: 10px;
+            transition: width 0.5s ease-in-out;
+        }
+
+        /* --- End Screen & Certificate --- */
+        .certificate {
+            border: 10px solid var(--accent-color);
+            padding: 30px;
+            border-radius: var(--border-radius);
+            background: linear-gradient(135deg, #e0f7fa 0%, #ffffff 100%);
+            margin-bottom: 20px;
+        }
+
+        .certificate h2 {
+            color: var(--primary-text);
+            font-size: 2em;
+        }
+        
+        #cert-student-name {
+            color: var(--accent-hover);
+            font-size: 1.8em;
+            font-weight: bold;
+            margin: 10px 0;
+        }
+
+        .final-message {
+            font-size: 1.2em;
+            margin: 20px 0;
+        }
+        
+        .certificate p {
+            font-size: 1.1em;
+        }
+    </style>
+</head>
+<body>
+    
+    <div class="top-header">حياكم مع صفحة أستاذ علي الهلال</div>
+    
+    <div class="teacher-profile" style="text-align: center; padding: 20px;">
+        <img src="https://a.top4top.io/p_3472z2a1c1.jpg" alt="أستاذ علي الهلال" onerror="this.onerror=null; this.src='https://placehold.co/150x150/00bcd4/FFFFFF?text=A.H';">
+    </div>
+
+    <div class="game-container">
+        <!-- شاشة البداية -->
+        <div id="start-screen" class="screen active">
+            <h1 class="main-title">مرحبًا بك ابني الطالب مع أستاذك علي الهلال</h1>
+            <div class="input-group">
+                <label for="student-name">ادخل اسمك يا بطل</label>
+                <input type="text" id="student-name" placeholder="الاسم هنا...">
+            </div>
+            <div class="input-group">
+                <label for="student-class">صفك الدراسي</label>
+                <input type="text" id="student-class" placeholder="الصف هنا...">
+            </div>
+            <button id="start-btn" class="btn">بدء المغامرة!</button>
+        </div>
+
+        <!-- شاشة اللعبة -->
+        <div id="game-screen" class="screen">
+            <div class="hud">
+                <div id="score" class="hud-item">النقاط المكتسبة: <span>0</span></div>
+                <div id="lost-points" class="hud-item">الطاقة المفقودة: <span>0</span></div>
+            </div>
+            <div id="question-container">
+                <p id="question-text"></p>
+            </div>
+            <div id="answers-container" class="answers">
+                <!-- الأجوبة ستضاف هنا عبر جافاسكريبت -->
+            </div>
+            <div class="progress-bar-container">
+                <div id="progress-bar" class="progress-bar-inner"></div>
+            </div>
+        </div>
+
+        <!-- شاشة النهاية -->
+        <div id="end-screen" class="screen">
+            <div id="certificate" class="certificate">
+                <h2>شهادة شكر وتقدير</h2>
+                <p>تُمنح هذه الشهادة للمستكشف الرائع/ة:</p>
+                <h3 id="cert-student-name"></h3>
+                <p>من الصف: <span id="cert-student-class"></span></p>
+                <p class="final-message" id="final-message"></p>
+                <p>نتيجتك النهائية: <span id="final-score"></span>%</p>
+            </div>
+            <button id="restart-btn" class="btn">العب مرة أخرى</button>
+        </div>
+    </div>
+
+    <script>
+        // --- DOM Elements ---
+        const startScreen = document.getElementById('start-screen');
+        const gameScreen = document.getElementById('game-screen');
+        const endScreen = document.getElementById('end-screen');
+
+        const startBtn = document.getElementById('start-btn');
+        const restartBtn = document.getElementById('restart-btn');
+
+        const studentNameInput = document.getElementById('student-name');
+        const studentClassInput = document.getElementById('student-class');
+
+        const scoreEl = document.querySelector('#score span');
+        const lostPointsEl = document.querySelector('#lost-points span');
+        const progressBar = document.getElementById('progress-bar');
+        
+        const questionTextEl = document.getElementById('question-text');
+        const answersContainer = document.getElementById('answers-container');
+
+        const certStudentName = document.getElementById('cert-student-name');
+        const certStudentClass = document.getElementById('cert-student-class');
+        const finalMessageEl = document.getElementById('final-message');
+        const finalScoreEl = document.getElementById('final-score');
+
+        // --- Questions Database ---
+        const questions = [
+            {
+                question: "ما هو المكون الأساسي للفيروس؟",
+                answers: ["غشاء خلوي وسيتوبلازم", "مادة وراثية وغلاف بروتيني", "نواة وميتوكوندريا", "جدار خلوي"],
+                correct: 1
+            },
+            {
+                question: "هل تعتبر الفيروسات كائنات حية؟",
+                answers: ["نعم، دائمًا", "لا، أبدًا", "هي على حافة الحياة والجماد", "فقط عندما تكون داخل خلية"],
+                correct: 2
+            },
+            {
+                question: "كيف تتكاثر الفيروسات؟",
+                answers: ["بالانقسام الثنائي", "عن طريق إصابة خلية مضيفة", "من خلال التبرعم", "بشكل مستقل في الطبيعة"],
+                correct: 1
+            },
+            {
+                question: "ما هي الوظيفة الأساسية للقاح؟",
+                answers: ["قتل الفيروسات مباشرة", "تحفيز جهاز المناعة للتعرف على الفيروس", "توفير تغذية للخلية", "إصلاح الخلايا التالفة"],
+                correct: 1
+            },
+            {
+                question: "أي من التالي يعد فيروسًا مشهورًا يسبب أمراضًا للإنسان؟",
+                answers: ["بكتيريا الإشريكية القولونية", "فطر الخميرة", "فيروس الإنفلونزا", "طحلب الكلاميدوموناس"],
+                correct: 2
+            },
+            {
+                question: "ماذا يسمى الغلاف البروتيني للفيروس؟",
+                answers: ["الكبسولة", "الجدار الخلوي", "النوية", "الكبسيد"],
+                correct: 3
+            },
+            {
+                question: "هل يمكن استخدام المضادات الحيوية لعلاج العدوى الفيروسية؟",
+                answers: ["نعم، فهي فعالة جدًا", "نعم، ولكن فقط للفيروسات القوية", "لا، المضادات الحيوية تعمل ضد البكتيريا فقط", "فقط إذا تم تناولها مع فيتامين سي"],
+                correct: 2
+            }
+        ];
+
+        // --- Game State ---
+        let currentQuestionIndex;
+        let score;
+        let lostPoints;
+        let shuffledQuestions;
+        let studentName = '';
+        let studentClass = '';
+
+        // --- Event Listeners ---
+        startBtn.addEventListener('click', startGame);
+        restartBtn.addEventListener('click', () => {
+            // Reset inputs and switch screens
+            studentNameInput.value = '';
+            studentClassInput.value = '';
+            switchScreen(startScreen);
+        });
+
+        // --- Functions ---
+        function switchScreen(activeScreen) {
+            document.querySelectorAll('.screen').forEach(screen => {
+                screen.classList.remove('active');
+            });
+            activeScreen.classList.add('active');
+        }
+
+        function startGame() {
+            studentName = studentNameInput.value.trim();
+            studentClass = studentClassInput.value.trim();
+            if (studentName === "") {
+                alert("الرجاء إدخال اسمك يا بطل!");
+                return;
+            }
+            
+            // Reset game state
+            currentQuestionIndex = 0;
+            score = 0;
+            lostPoints = 0;
+            shuffledQuestions = questions.sort(() => Math.random() - 0.5);
+            
+            updateHUD();
+            displayQuestion();
+            switchScreen(gameScreen);
+        }
+
+        function displayQuestion() {
+            // Clear previous answers
+            answersContainer.innerHTML = '';
+            
+            // Update progress bar
+            const progressPercent = (currentQuestionIndex / shuffledQuestions.length) * 100;
+            progressBar.style.width = `${progressPercent}%`;
+
+            if (currentQuestionIndex >= shuffledQuestions.length) {
+                endGame();
+                return;
+            }
+
+            const currentQuestion = shuffledQuestions[currentQuestionIndex];
+            questionTextEl.textContent = currentQuestion.question;
+
+            currentQuestion.answers.forEach((answer, index) => {
+                const button = document.createElement('button');
+                button.textContent = answer;
+                button.classList.add('answer-btn');
+                button.addEventListener('click', () => selectAnswer(index));
+                answersContainer.appendChild(button);
+            });
+        }
+
+        function selectAnswer(selectedIndex) {
+            const currentQuestion = shuffledQuestions[currentQuestionIndex];
+            const answerButtons = answersContainer.querySelectorAll('.answer-btn');
+
+            // Disable all buttons after an answer is chosen
+            answerButtons.forEach(btn => btn.disabled = true);
+
+            if (selectedIndex === currentQuestion.correct) {
+                score++;
+                answerButtons[selectedIndex].classList.add('correct');
+            } else {
+                lostPoints++;
+                answerButtons[selectedIndex].classList.add('incorrect');
+                // Highlight the correct answer
+                answerButtons[currentQuestion.correct].classList.add('correct');
+            }
+
+            updateHUD();
+
+            // Wait a moment before showing the next question
+            setTimeout(() => {
+                currentQuestionIndex++;
+                displayQuestion();
+            }, 1500);
+        }
+
+        function updateHUD() {
+            scoreEl.textContent = score;
+            lostPointsEl.textContent = lostPoints;
+        }
+
+        function endGame() {
+            progressBar.style.width = '100%';
+            const finalScorePercent = Math.round((score / shuffledQuestions.length) * 100);
+            
+            certStudentName.textContent = studentName;
+            certStudentClass.textContent = studentClass || "غير محدد"; // Handle empty class input
+            finalScoreEl.textContent = finalScorePercent;
+
+            if (finalScorePercent >= 90) {
+                finalMessageEl.textContent = "عمل مذهل! أنت خبير فيروسات حقيقي!";
+            } else if (finalScorePercent >= 70) {
+                finalMessageEl.textContent = "أداء رائع! لديك معرفة ممتازة.";
+            } else if (finalScorePercent >= 50) {
+                finalMessageEl.textContent = "عمل جيد! استمر في التعلم والمحاولة.";
+            } else {
+                finalMessageEl.textContent = "لا بأس، كل رحلة استكشاف تبدأ بخطوة. حاول مرة أخرى!";
+            }
+            
+            switchScreen(endScreen);
+        }
+    </script>
+</body>
+</html>
